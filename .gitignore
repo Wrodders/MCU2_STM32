@@ -1,3 +1,8 @@
+#mbed os
+*/mbed-os/
+*/cmake_build/
+
+
 # Prerequisites
 *.d
 
