@@ -89,8 +89,8 @@ class Cursor{
         }
         void shift(){
             erase(); // clear old line
-            coords[0] += 15;
-            coords[2] += 15;
+            coords[0] += 15; //x1 
+            coords[2] += 15; //x2 
         }
         void cursorReset(){
             erase(); // clear old line
@@ -161,7 +161,7 @@ class Operator{
         }
         inline char getC(void){return *op;}
 
-        void run(Num n1, Num n2, float & result){
+        void run(Num n1, Num n2, volatile float & result){
             switch (*op){
                 case '+':
                     result = n1.val + n2.val;
@@ -198,7 +198,7 @@ class Operator{
 class Calc{
     //@Breif Main Calculator application
     private:
-        float result;
+        volatile float result;
     public:
         int grid[5];
         Num n1;
@@ -239,6 +239,7 @@ InterruptIn down(A3);
 //********* ISR's ****************** //
 void calcISR(void){
     //@Breif Updates LCD with Values
+    calc.update();
     lcd.cls(); //clear lcd hot fix
     lcd.character(calc.grid[0] + 2, 5, calc.n1.getC()); 
     lcd.character(calc.grid[1] + 2, 5, calc.op.getC());
@@ -261,9 +262,11 @@ void fireISR(void){
     }
     switch (state){
         case INIT:
+        
             calcTick.attach(&calcISR, 0.25); // 250ms calc update loop
             blinkTick.attach(&blinkISR, 0.5); //500ms blink update loop
             state = NUM1; 
+            led.set(RED);
             break;
         case NUM1:
             cursor.shift(); 
@@ -281,9 +284,10 @@ void fireISR(void){
             state = NUM1;   
             break;
         default:
+            
             state = INIT;
             cursor.cursorReset(); // shift cursto to begingin 
-            led.set(RED);
+
             break;
     }
 }
